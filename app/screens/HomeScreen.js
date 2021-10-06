@@ -1,17 +1,23 @@
 import React from 'react';
-import { View, Text, Button, StyleSheet, StatusBar } from 'react-native';
+import { View, Text, Button, StyleSheet, StatusBar, TouchableOpacity } from 'react-native';
 import { useTheme } from '@react-navigation/native';
 import { auth } from '../../firebase';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import Feather from 'react-native-vector-icons/Feather';
+import { UserContext } from '../UserContext';
 
 const HomeScreen = ({navigation}) => {
+
+  const {user} = React.useContext(UserContext);
 
   const { colors } = useTheme();
 
   const handleSignOut = () => {
+    console.log("logged out ", user.email)
     auth.
     signOut()
     .then(() => {
-      navigation.replace("SignInScreen")
+      navigation.navigate("SignInScreen")
     })
     .catch(error => alert(error.message))
   }
@@ -21,7 +27,23 @@ const HomeScreen = ({navigation}) => {
     return (
       <View style={styles.container}>
         <StatusBar barStyle= { theme.dark ? "light-content" : "dark-content" }/>
-        <Text style={{color: colors.text}}>Home Screen</Text>
+        <View style={styles.head}>
+        <TouchableOpacity>
+          <AntDesign 
+            name="menufold"
+            color={colors.text}
+            size={30}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Feather
+            name="bell"
+            color={colors.text}
+            size={30}
+          />
+        </TouchableOpacity>
+        </View>
+        <Text style={styles.text}>What's up {user.email}!</Text>
       <Button
         // title="Go to details screen"
         title="logout"
@@ -37,7 +59,21 @@ export default HomeScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1, 
-    alignItems: 'center', 
-    justifyContent: 'center'
+    backgroundColor: '#ffffff',
+    alignItems: 'center'
   },
+  head: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    padding: 15,
+  },
+  text: {
+    color: '#000',
+    fontSize: 30,
+    fontWeight: 'bold',
+    width: '100%',
+    padding: 15,
+    justifyContent: 'flex-start'
+  }
 });

@@ -6,9 +6,9 @@
     "orientation": "default",
     "icon": "./app/assets/listify.png",
     "splash": {
-      "image": "./app/assets/listify.png",
+      "image": "./app/assets/splashImage.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#FFFFFF"
     },
     "updates": {
       "fallbackToCacheTimeout": 0

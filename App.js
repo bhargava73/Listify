@@ -7,18 +7,13 @@ import {
   DefaultTheme as NavigationDefaultTheme,
   DarkTheme as NavigationDarkTheme
 } from '@react-navigation/native';
+import { UserContext, UserProvider } from './app/UserContext';
 import RootStackScreen from './app/screens/RootStackScreen';
-
+import HomeScreen from './app/screens/HomeScreen';
 export default function App() {
-  return <NavigationContainer><RootStackScreen/></NavigationContainer>
-  
+  return <UserProvider>
+    <NavigationContainer>
+      <RootStackScreen/>
+    </NavigationContainer>
+    </UserProvider>
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

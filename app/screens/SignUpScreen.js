@@ -7,6 +7,7 @@ import {
     TouchableOpacity, 
     Dimensions,
     TextInput,
+    ImageBackground,
     Platform,
     StyleSheet,
     ScrollView,
@@ -17,20 +18,39 @@ import { LinearGradient } from 'expo-linear-gradient';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Feather from 'react-native-vector-icons/Feather';
 import {auth} from '../../firebase';
+import { UserContext } from '../UserContext';
 
 const SignUpScreen = ({navigation}) => {
-
+    const {user, setUser, register} = React.useContext(UserContext);
     const [data, setData] = useState({
+        username: '',
         email: '',
         password: '',
         confirm_password: '',
         isValidPassword: true,
         check_textInputChange: false,
+        check_usernameInputChange: false,
         secureTextEntry: true,
         confirm_secureTextEntry: true,
     });
 
     const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+    const usernameInputChange = (val) => {
+        if( val.length !== 0 && emailRegex.test(val)) {
+            setData({
+                ...data,
+                username: val,
+                check_usernameInputChange: true
+            });
+        } else {
+            setData({
+                ...data,
+                username: val,
+                check_usernameInputChange: false
+            });
+        }
+    }
 
     const textInputChange = (val) => {
         if( val.length !== 0 && emailRegex.test(val)) {
@@ -97,13 +117,21 @@ const SignUpScreen = ({navigation}) => {
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(user => {
             if (user) {
+                setUser(user);
                 navigation.navigate("SignInScreen")
             }
         })
         return unsubscribe
     }, [])
 
-    const handleSignUpSubmit = (email, password, confirm_password) => {
+    const handleSignUpSubmit = (username, email, password, confirm_password) => {
+
+        if (username.length < 4) {
+            Alert.alert('','Username must be atleast 4 characters.', [
+                {text: 'Okay'}
+            ]);
+            return;
+        }
 
         if (email.length === 0 || !emailRegex.test(data.email) ) {
             Alert.alert('','Please enter a valid email id.', [
@@ -125,19 +153,15 @@ const SignUpScreen = ({navigation}) => {
             ]);
             return;
         }else {
-            auth.
-            createUserWithEmailAndPassword(email,password)
-            .then(userCredentials => {
-                const user = userCredentials.user;
-                console.log("registered user is ",user.email)
-            })
-            .catch(error => alert(error.message))
+            register(username,email,password);
         }
     }
 
     return (
-      <View style={styles.container}>
-          <StatusBar backgroundColor='#009387' barStyle="light-content"/>
+      <Animatable.View animation="zoomIn"style={styles.container}>
+        <ImageBackground source={require('../assets/register.png')} resizeMode="contain" style={styles.image}>
+            <StatusBar backgroundColor='#ffffff' barStyle="dark-content"/>
+        </ImageBackground>
         <View style={styles.header}>
             <Text style={styles.text_header}>Register Now!</Text>
         </View>
@@ -146,7 +170,35 @@ const SignUpScreen = ({navigation}) => {
             style={styles.footer}
         >
             <ScrollView>
-                <Text style={styles.text_footer}>Email</Text>
+            <Text style={styles.text_footer}>Username</Text>
+                <View style={styles.action}>
+                    <Feather
+                        name="user"
+                        color="#05375a"
+                        size={20}
+                    />
+                    <TextInput 
+                        placeholder="Your Username"
+                        style={styles.textInput}
+                        autoCapitalize="none"
+                        onChangeText={(val) => usernameInputChange(val)}
+                    />
+                    {data.check_usernameInputChange ? 
+                    <Animatable.View
+                        animation="bounceIn"
+                    >
+                        <Feather 
+                            name="check-circle"
+                            color="green"
+                            size={20}
+                        />
+                    </Animatable.View>
+                    : null}
+                </View>
+
+                <Text style={[styles.text_footer, {
+                    marginTop: 35
+                }]}>Email</Text>
                 <View style={styles.action}>
                     <MaterialIcons
                         name="mail-outline"
@@ -252,10 +304,10 @@ const SignUpScreen = ({navigation}) => {
                 <View style={styles.button}>
                     <TouchableOpacity
                         style={styles.signIn}
-                        onPress={() => {handleSignUpSubmit(data.email, data.password, data.confirm_password)}}
+                        onPress={() => {handleSignUpSubmit(data.username,data.email, data.password, data.confirm_password)}}
                     >
                         <LinearGradient
-                            colors={['#08d4c4', '#01ab9d']}
+                            colors={['#FF725E', '#ff8e80']}
                             style={styles.signIn}
                         >
                             <Text style={[styles.textSign, {
@@ -264,18 +316,31 @@ const SignUpScreen = ({navigation}) => {
                         </LinearGradient>
                     </TouchableOpacity>
 
-                    <View style={styles.textPrivate}>
+                    {/* <View style={styles.textPrivate}>
                         <Text style={styles.color_textPrivate}>
                             Already have an account? 
                         </Text>
                         <TouchableOpacity onPress={() => navigation.navigate('SignInScreen')}>
                             <Text style={[styles.color_textPrivate, {fontWeight: 'bold',color: '#009387'}]}> Sign in now!</Text>
                         </TouchableOpacity>
-                    </View>
+                    </View> */}
+
+                    <TouchableOpacity
+                        onPress={() => navigation.replace('SignInScreen')}
+                        style={[styles.signIn, {
+                            borderColor: '#042c48aa',
+                            borderWidth: 1,
+                            marginTop: 20,
+                        }]}
+                    >
+                        <Text style={[styles.textSign, {
+                            color: '#042c48aa'
+                        }]}>Hey...I already have an account!</Text>
+                    </TouchableOpacity>
                 </View>
             </ScrollView>
         </Animatable.View>
-      </View>
+      </Animatable.View>
     );
 };
 
@@ -284,26 +349,35 @@ export default SignUpScreen;
 const styles = StyleSheet.create({
     container: {
       flex: 1, 
-      backgroundColor: '#009387'
+      backgroundColor: '#ffffff'
     },
     header: {
         flex: 1,
-        justifyContent: 'flex-end',
+        justifyContent: 'center',
+        alignItems: 'center',
         paddingHorizontal: 20,
-        paddingBottom: 50
+        marginTop: -40
+    },
+    image: {
+        flex: 1,
+        marginTop: 20,
+        justifyContent: "flex-start",
     },
     footer: {
-        flex: Platform.OS === 'ios' ? 3 : 5,
+        flex: 3,
         backgroundColor: '#fff',
         borderTopLeftRadius: 30,
         borderTopRightRadius: 30,
         paddingHorizontal: 20,
-        paddingVertical: 30
+        paddingVertical: 0,
+        marginTop: -70
     },
     text_header: {
-        color: '#fff',
+        color: '#444444',
         fontWeight: 'bold',
-        fontSize: 30
+        alignItems: 'center',
+        fontSize: 30,
+        marginBottom: 60
     },
     text_footer: {
         color: '#05375a',
@@ -331,7 +405,7 @@ const styles = StyleSheet.create({
         height: 50,
         justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: 10
+        borderRadius: 50
     },
     textSign: {
         fontSize: 18,
