@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Button, StyleSheet, StatusBar, TouchableOpacity } from 'react-native';
+import { View, Text, Button, StyleSheet, StatusBar, TouchableOpacity, Image } from 'react-native';
 import { useTheme } from '@react-navigation/native';
 import { auth } from '../../firebase';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -43,7 +43,9 @@ const HomeScreen = ({navigation}) => {
           />
         </TouchableOpacity>
         </View>
-        <Text style={styles.text}>What's up {user.email}!</Text>
+        <Text style={styles.text}>What's up {user.username}!</Text>
+        {/* <Image source={require('../assets/user_placeholder.png')} resizeMode="contain" style={styles.image}>
+        </Image> */}
       <Button
         // title="Go to details screen"
         title="logout"
@@ -67,6 +69,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     width: '100%',
     padding: 15,
+  },
+  image: {
+    marginTop: 20,
+    flex: 1,
+    justifyContent: "flex-start",
   },
   text: {
     color: '#000',

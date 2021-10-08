@@ -1,5 +1,5 @@
 import React from 'react';
-
+import * as firebase from "firebase";
 import { createStackNavigator } from '@react-navigation/stack';
 
 import SplashScreen from './SplashScreen';
@@ -11,7 +11,13 @@ import { UserContext } from '../UserContext';
 const RootStack = createStackNavigator();
 
 const RootStackScreen = ({navigation}) => {
-    const user = React.useContext(UserContext);
+    const {user,setUser} = React.useContext(UserContext);
+    React.useEffect(() => {
+        if (user) {
+            setUser(user);
+            navigation.navigate("HomeScreen")
+        }
+    }, [])
     return (
     <RootStack.Navigator >
         <RootStack.Screen options={{headerShown: false}} name="SplashScreen" component={SplashScreen}/>

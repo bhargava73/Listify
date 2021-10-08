@@ -1,10 +1,10 @@
 import React, { createContext, useState } from "react";
-import { auth } from "../firebase";
-import firestore from 'firebase/firestore';
+// import { auth } from "../firebase";
+// import firestore from 'firebase/firestore';
+import * as firebase from "firebase";
+import "firebase/firestore";
 export const UserContext = createContext();
 
-
-// This context provider is passed to any component requiring the context
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   return (
@@ -13,36 +13,47 @@ export const UserProvider = ({ children }) => {
         user,
         setUser,
         login: (email,password) => {
-            auth
+            firebase.auth()
             .signInWithEmailAndPassword(email,password)
-            .then(userCredentials => {
-                setUser(userCredentials.user)
+            .then(() => {
+                firebase
+                .firestore()
+                .collection('users')
+                .doc(firebase.auth().currentUser.uid)
+                .get()
+                .then((doc)=>{
+                  setUser(doc.data());
+                })
             }).then(()=>{
-                console.log('logged in user is ', user.email)
+                console.log('logged in user is ', user.username)
             })
             .catch(error => alert(error.message))
             },
         register: (username,email,password) => {
-            auth.
+            firebase.auth().
             createUserWithEmailAndPassword(email,password).then(()=>
             {
-                firestore.collection('users').doc(auth.currentUser.uid)
+                console.log(firebase.auth().currentUser.uid);
+                const db = firebase.firestore();
+                db.collection('users').doc(firebase.auth().currentUser.uid)
               .set({
                   username: username,
                   email: email,
-                  createdAt: firestore.Timestamp.fromDate(new Date()),
-                  userImg: null,
+                  userImg: './assets/register.png',
               })
               .catch(error => {
-                  console.log('Something went wrong with added user to firestore: ', error);
+                  console.log('Something went wrong with added user to firestore: ', error.message);
               })
             })
             .then(userCredentials => {
-                const user = userCredentials.user;
-                setUser(userCredentials.user)
+                setUser(user);
                 console.log("registered user is ",user.email)
             })
             .catch(error => alert(error.message))
+        },
+        logout: ()=> {
+          firebase.auth().
+            signOut();
         }
         }}
     >
