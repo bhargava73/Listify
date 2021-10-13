@@ -11,13 +11,6 @@ import { UserContext } from '../UserContext';
 const RootStack = createStackNavigator();
 
 const RootStackScreen = ({navigation}) => {
-    const {user,setUser} = React.useContext(UserContext);
-    React.useEffect(() => {
-        if (user) {
-            setUser(user);
-            navigation.navigate("HomeScreen")
-        }
-    }, [])
     return (
     <RootStack.Navigator >
         <RootStack.Screen options={{headerShown: false}} name="SplashScreen" component={SplashScreen}/>
